@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 import logging
-
+import threading
+import pika
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('consumer-service')
-
 
 app = Flask(__name__)
 PORT = 8080
@@ -34,5 +34,24 @@ def handle_post_message():
         return jsonify({"status": "error", "message": "No message provided"}), 400
 
 
+def callback(ch, method, properties, body):
+    message = body.decode()
+    logger.info(f"Received message from RabbitMQ: {message}")
+
+
+def consume_rabbitmq():
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='queue')
+
+    channel.basic_consume(queue='queue', on_message_callback=callback, auto_ack=True)
+
+    logger.info('Started consuming from RabbitMQ queue...')
+    channel.start_consuming()
+
+
 if __name__ == '__main__':
+    rabbitmq_thread = threading.Thread(target=consume_rabbitmq, daemon=True)
+    rabbitmq_thread.start()
+
     app.run(host=host, port=PORT)
