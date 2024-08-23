@@ -10,7 +10,7 @@ services:
 
   producer:
     build:
-      context: ./creating_microservices/producer
+      context: producer
     depends_on:
       - rabbitmq
     environment:
@@ -19,7 +19,7 @@ services:
 
   consumer:
     build:
-      context: ./creating_microservices/consumer
+      context: consumer
     depends_on:
       - rabbitmq
     environment:
