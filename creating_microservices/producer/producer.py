@@ -11,7 +11,7 @@ logging.getLogger('requests').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 
 URL_API = "https://techy-api.vercel.app/api/json"
-RABBITMQ_HOST = 'localhost'
+RABBITMQ_HOST = 'rabbitmq'
 QUEUE_NAME = 'queue'
 
 

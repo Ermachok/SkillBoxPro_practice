@@ -36,7 +36,7 @@
 2. Запустите `consumer_service`, который будет слушать очередь RabbitMQ и обрабатывать сообщения:
 
     ```bash
-    python consumer_service.py
+    python consumer.py
     ```
 
 ### Запуск `producer_service`
@@ -45,7 +45,7 @@
 2. Запустите `producer_service`, который будет генерировать и отправлять сообщения в RabbitMQ:
 
     ```bash
-    python producer_service.py
+    python producer.py
     ```
 
 

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3
+    ports:
+      - "15672:15672"
+      - "5672:56772"
+
+  producer:
+    build:
+      context: ./creating_microservices/producer
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBIRMQ_PORT=5672
+
+
+  consumer:
+    build:
+      context: ./creating_microservices/consumer
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBIRMQ_PORT=5672

@@ -7,8 +7,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger('consumer-service')
 
 app = Flask(__name__)
-PORT = 8080
-host = '0.0.0.0'
+PORT = 5672
+RABBIT_HOST = 'rabbitmq'
 
 
 @app.route('/messages', methods=['GET'])
@@ -40,7 +40,7 @@ def callback(ch, method, properties, body):
 
 
 def consume_rabbitmq():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_HOST))
     channel = connection.channel()
     channel.queue_declare(queue='queue')
 
@@ -54,4 +54,4 @@ if __name__ == '__main__':
     rabbitmq_thread = threading.Thread(target=consume_rabbitmq, daemon=True)
     rabbitmq_thread.start()
 
-    app.run(host=host, port=PORT)
+    app.run(host='0.0.0.0', port=PORT)
