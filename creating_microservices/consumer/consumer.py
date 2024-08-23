@@ -2,13 +2,15 @@ from flask import Flask, request, jsonify
 import logging
 import threading
 import pika
+import time
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('consumer-service')
 
 app = Flask(__name__)
-PORT = 5672
-RABBIT_HOST = 'rabbitmq'
+APP_PORT: int = 8080
+RABBIT_HOST: str = 'rabbitmq'
+RABBIT_PORT: int = 5672
 
 
 @app.route('/messages', methods=['GET'])
@@ -39,8 +41,23 @@ def callback(ch, method, properties, body):
     logger.info(f"Received message from RabbitMQ: {message}")
 
 
+def wait_for_rabbitmq(host: str, port: int = 5672, timeout: int = 30):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
+            connection.close()
+            logger.info("RabbitNQ is available")
+            return True
+        except Exception as e:
+            logger.info(f"Waiting for RabbitMQ, exception = {e}")
+            time.sleep(3)
+    logger.error("RabbitMQ didn't become available")
+    return False
+
+
 def consume_rabbitmq():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_HOST))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBIT_HOST, port=RABBIT_PORT))
     channel = connection.channel()
     channel.queue_declare(queue='queue')
 
@@ -51,7 +68,10 @@ def consume_rabbitmq():
 
 
 if __name__ == '__main__':
-    rabbitmq_thread = threading.Thread(target=consume_rabbitmq, daemon=True)
-    rabbitmq_thread.start()
+    if wait_for_rabbitmq(host=RABBIT_HOST, port=RABBIT_PORT):
+        rabbitmq_thread = threading.Thread(target=consume_rabbitmq, daemon=True)
+        rabbitmq_thread.start()
 
-    app.run(host='0.0.0.0', port=PORT)
+        app.run(host='0.0.0.0', port=APP_PORT)
+    else:
+        logger.error("Exiting because RabbitMq isn't alive")

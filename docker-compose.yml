@@ -5,7 +5,8 @@ services:
     image: rabbitmq:3
     ports:
       - "15672:15672"
-      - "5672:56772"
+      - "5672:5672"
+
 
   producer:
     build:
@@ -14,7 +15,6 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_HOST=rabbitmq
-      - RABBIRMQ_PORT=5672
 
 
   consumer:
@@ -24,4 +24,3 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_HOST=rabbitmq
-      - RABBIRMQ_PORT=5672
